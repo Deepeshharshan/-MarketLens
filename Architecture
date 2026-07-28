@@ -1,0 +1,19 @@
+stock-price-prediction/
+│
+├── frontend/
+│   ├── app/
+│   ├── components/
+│   ├── hooks/
+│   └── services/
+│
+├── backend/
+│   ├── api/
+│   ├── models/
+│   ├── ml/
+│   ├── services/
+│   └── database/
+│
+├── dataset/
+├── notebooks/
+├── trained_models/
+└── README.md
