@@ -1,0 +1,273 @@
+# MarketLens – AI Development Workflow
+
+## Objective
+
+Build MarketLens with production-grade quality while minimizing unnecessary token consumption. Prioritize efficient communication without sacrificing architecture, maintainability, scalability, or code quality.
+
+---
+
+# Core Principles
+
+## 1. Think Before Generating
+
+- Analyze the entire task before writing code.
+- Avoid unnecessary explanations.
+- Output only what is required.
+- Never regenerate files that do not need changes.
+
+---
+
+## 2. Preserve Code Quality
+
+Token optimization must NEVER reduce code quality.
+
+Maintain:
+
+- Clean Architecture
+- SOLID Principles
+- DRY
+- KISS
+- Separation of Concerns
+- Type Safety
+- Proper Error Handling
+- Reusable Components
+- Scalable Folder Structure
+- Security Best Practices
+
+Always write production-ready code.
+
+---
+
+## 3. Incremental Development
+
+Never generate the whole project again.
+
+Instead:
+
+- Modify only affected files.
+- Mention unchanged files without rewriting them.
+- Generate the smallest valid diff possible.
+
+Example:
+
+✅ Update:
+- backend/api/predict.py
+
+No changes:
+- auth/
+- models/
+- database/
+
+---
+
+## 4. No Duplicate Code
+
+Before creating:
+
+- Components
+- Hooks
+- Services
+- Utilities
+- Types
+- APIs
+
+Check whether they already exist.
+
+Reuse instead of recreating.
+
+---
+
+## 5. Keep Responses Compact
+
+Avoid:
+
+- Long introductions
+- Repeating previous context
+- Explaining obvious code
+- Restating requirements
+
+Only explain decisions when necessary.
+
+---
+
+## 6. Maintain Project Context
+
+Assume previous files still exist.
+
+Never rewrite:
+
+- package.json
+- tsconfig.json
+- next.config
+- requirements.txt
+- Docker files
+- Existing APIs
+
+unless explicitly requested.
+
+---
+
+## 7. Follow Existing Architecture
+
+Do not invent new structures.
+
+Respect existing:
+
+- naming conventions
+- folder structure
+- coding style
+- design system
+- theme
+- APIs
+
+---
+
+## 8. Reuse Existing Dependencies
+
+Before installing anything:
+
+Check whether the project already contains an equivalent library.
+
+Do not install duplicate packages.
+
+---
+
+## 9. Output Format
+
+Always use:
+
+### Files Changed
+
+- file/path
+
+### Reason
+
+One short paragraph.
+
+### Code
+
+Only the modified code.
+
+---
+
+## 10. No Placeholder Code
+
+Avoid:
+
+TODO
+
+Coming Soon
+
+Dummy implementations
+
+Pseudo code
+
+Mock business logic
+
+If a feature is implemented, implement it completely.
+
+---
+
+## 11. Ask Only When Necessary
+
+Do not interrupt development for minor assumptions.
+
+Ask questions only if the answer would significantly affect architecture or functionality.
+
+---
+
+## 12. Performance First
+
+Optimize for:
+
+- Fast rendering
+- Small bundle size
+- Lazy loading
+- Code splitting
+- Memoization where appropriate
+- Efficient database queries
+- API caching when useful
+
+---
+
+## 13. Production Standards
+
+Every feature should include:
+
+- Validation
+- Error handling
+- Loading states
+- Empty states
+- Responsive UI
+- Accessibility
+- Type safety
+- Logging where appropriate
+
+---
+
+## 14. Consistency
+
+Always follow the same coding style.
+
+No mixed conventions.
+
+No unnecessary abstractions.
+
+No overengineering.
+
+---
+
+# Token Optimization Rules
+
+Instead of rewriting entire files:
+
+✅ show only modified sections.
+
+Avoid explaining code unless requested.
+
+Avoid repeating project summaries.
+
+Avoid generating documentation unless requested.
+
+Avoid generating installation commands repeatedly.
+
+Never regenerate components that already exist.
+
+Never regenerate APIs that are unchanged.
+
+---
+
+# Project Goal
+
+Project Name:
+MarketLens
+
+Objective:
+
+Develop a full-stack AI-powered stock market platform with:
+
+- Stock price prediction
+- Real-time market data
+- Interactive charts
+- Technical indicators
+- Portfolio tracking
+- Watchlist
+- Authentication
+- AI insights
+- News sentiment analysis
+- Responsive web app
+- Mobile app
+
+The final result should be production-ready, scalable, maintainable, and deployment-ready.
+
+---
+
+# Response Priority
+
+1. Correctness
+2. Maintainability
+3. Scalability
+4. Performance
+5. Token Efficiency
+
+Token efficiency must NEVER reduce software quality.
