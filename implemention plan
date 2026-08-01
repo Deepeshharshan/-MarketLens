@@ -1,0 +1,532 @@
+# MarketLens AI — Implementation Plan
+
+Build a professional, production-ready AI-powered stock analytics platform with a Next.js frontend, FastAPI backend, and Python ML engine.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **This is a very large project.** I propose building it in **4 phases** to keep progress visible and allow you to review each milestone. Each phase builds on the previous one and results in a working, demoable state.
+
+> [!WARNING]
+> **API Keys**: Alpha Vantage and Finnhub require free API keys. Yahoo Finance (`yfinance`) works without a key. I'll wire up Yahoo Finance first and make the others configurable via environment variables. Please provide API keys when ready, or I'll use mock/demo data where needed.
+
+> [!IMPORTANT]
+> **Tailwind CSS 4**: The latest Tailwind is v4. Your spec says "Tailwind CSS" — I'll use **Tailwind CSS v4** with the Next.js integration. Confirm if you'd prefer v3 instead.
+
+---
+
+## Open Questions
+
+1. **Database hosting**: Should I set up PostgreSQL via Docker Compose for local development, or do you have a hosted DB (e.g., Supabase, Neon)?
+2. **Email verification**: Should I integrate a real email service (SendGrid, Resend) or use console-based email for development?
+3. **Deployment target**: Vercel (frontend) + Railway/Render (backend), or fully Dockerized self-hosted?
+4. **Stock data source priority**: Start with Yahoo Finance (free, no key) and add Alpha Vantage / Finnhub later?
+
+---
+
+## Architecture Overview
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    FRONTEND (Next.js 15)                 │
+│  React 19 · TypeScript · Tailwind CSS 4 · Recharts      │
+│  Framer Motion · TanStack Query                         │
+│  Pages: Landing, Auth, Dashboard, Stock, Portfolio,     │
+│         Watchlist, News, Predictions, Settings, About   │
+└────────────────────────┬─────────────────────────────────┘
+                         │ REST API (JSON)
+┌────────────────────────▼─────────────────────────────────┐
+│                    BACKEND (FastAPI)                      │
+│  SQLAlchemy · JWT Auth · Redis Cache · Celery Workers    │
+│  Endpoints: /auth, /stocks, /predictions, /portfolio,   │
+│             /watchlist, /news, /indicators               │
+└────────────────────────┬─────────────────────────────────┘
+                         │
+┌────────────────────────▼─────────────────────────────────┐
+│                  ML ENGINE (Python)                       │
+│  TensorFlow · Scikit-learn · Pandas · NumPy              │
+│  Models: Linear Regression, Random Forest, XGBoost,     │
+│          LSTM, GRU                                       │
+└────────────────────────┬─────────────────────────────────┘
+                         │
+┌────────────────────────▼─────────────────────────────────┐
+│                  DATA SOURCES                            │
+│  Yahoo Finance (yfinance) · Alpha Vantage · Finnhub     │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Phase 1 — Foundation & Landing Page
+
+> **Goal**: Project scaffolding, design system, stunning landing page, and authentication UI.
+
+### Frontend Setup
+
+#### [NEW] `frontend/` — Next.js 15 App
+
+Scaffold with `create-next-app`:
+- Next.js 15 with App Router
+- TypeScript strict mode
+- Tailwind CSS 4
+- ESLint configuration
+- Source directory structure (`src/app/`, `src/components/`, `src/lib/`, `src/hooks/`, `src/types/`)
+
+#### [NEW] `frontend/src/styles/globals.css`
+- Design tokens as CSS custom properties
+- Color palette: Emerald (#10B981), Slate Black (#0F172A), Surface (#111827), Accent (#22C55E)
+- Typography scale with Inter font (Google Fonts)
+- Glassmorphism utility classes
+- Smooth animation keyframes
+- Dark mode as default
+
+#### [NEW] `frontend/src/components/ui/` — Shared UI Components
+- `Button.tsx` — Primary, secondary, ghost, outline variants
+- `Card.tsx` — Glassmorphic card with hover lift effect
+- `Input.tsx` — Styled form inputs
+- `Badge.tsx` — Status badges (Buy, Sell, Hold)
+- `Skeleton.tsx` — Loading skeletons
+- `Modal.tsx` — Animated modal
+- `Navbar.tsx` — Top navigation with glass effect
+- `Footer.tsx` — Full footer with links
+- `Logo.tsx` — MarketLens AI logo/brand mark
+- `AnimatedCounter.tsx` — Number counter animation
+- `GradientText.tsx` — Gradient text utility
+
+#### [NEW] `frontend/src/app/page.tsx` — Landing Page
+10 sections with Framer Motion animations:
+1. **Hero** — Headline, sub-headline, CTA buttons, animated stock chart preview
+2. **Trusted By** — Logo carousel of financial brands
+3. **Features** — 6 feature cards with icons (glassmorphic)
+4. **AI Prediction Demo** — Interactive demo showing prediction in action
+5. **Dashboard Preview** — Screenshot/mockup of the dashboard
+6. **Technical Indicators** — RSI, MACD, Bollinger Bands showcase
+7. **Portfolio Tracking** — Portfolio management preview
+8. **Pricing** — 3-tier pricing cards (Free, Pro, Enterprise)
+9. **FAQ** — Accordion-style FAQ
+10. **Footer** — Links, social, newsletter signup
+
+#### [NEW] `frontend/src/app/(auth)/login/page.tsx`
+- Email + password login form
+- Social login buttons (Google, GitHub — UI only)
+- "Forgot password" link
+- Redirect to dashboard on success
+
+#### [NEW] `frontend/src/app/(auth)/register/page.tsx`
+- Name, email, password, confirm password
+- Terms checkbox
+- Redirect to email verification
+
+#### [NEW] `frontend/src/app/(auth)/forgot-password/page.tsx`
+- Email input for password reset
+
+---
+
+### Backend Setup
+
+#### [NEW] `backend/` — FastAPI Application
+
+```
+backend/
+├── app/
+│   ├── main.py              # FastAPI app entry
+│   ├── config.py             # Settings & env vars
+│   ├── database.py           # SQLAlchemy engine & session
+│   ├── models/               # SQLAlchemy ORM models
+│   │   ├── user.py
+│   │   ├── watchlist.py
+│   │   ├── portfolio.py
+│   │   └── prediction.py
+│   ├── schemas/              # Pydantic schemas
+│   │   ├── user.py
+│   │   ├── stock.py
+│   │   ├── prediction.py
+│   │   └── portfolio.py
+│   ├── routers/              # API route handlers
+│   │   ├── auth.py
+│   │   ├── stocks.py
+│   │   ├── predictions.py
+│   │   ├── portfolio.py
+│   │   ├── watchlist.py
+│   │   └── news.py
+│   ├── services/             # Business logic
+│   │   ├── auth_service.py
+│   │   ├── stock_service.py
+│   │   ├── prediction_service.py
+│   │   └── news_service.py
+│   ├── ml/                   # Machine learning
+│   │   ├── models/
+│   │   ├── preprocessing.py
+│   │   ├── trainer.py
+│   │   └── predictor.py
+│   └── utils/
+│       ├── security.py       # JWT, password hashing
+│       └── dependencies.py   # FastAPI dependencies
+├── requirements.txt
+├── Dockerfile
+└── alembic/                  # DB migrations
+```
+
+#### [NEW] `backend/app/main.py`
+- FastAPI app with CORS middleware
+- Router includes for all endpoints
+- Health check endpoint
+- Startup/shutdown events for DB connection
+
+#### [NEW] `backend/app/routers/auth.py`
+- `POST /api/auth/register` — User registration
+- `POST /api/auth/login` — JWT token generation
+- `POST /api/auth/refresh` — Token refresh
+- `POST /api/auth/forgot-password` — Password reset request
+- `GET /api/auth/me` — Current user profile
+- `PUT /api/auth/profile` — Update profile
+
+---
+
+### DevOps
+
+#### [NEW] `docker-compose.yml`
+- PostgreSQL 16 service
+- Redis 7 service
+- Backend (FastAPI) service
+- Frontend (Next.js) service (dev mode)
+
+#### [NEW] `.env.example`
+- All environment variables documented
+
+---
+
+## Phase 2 — Dashboard & Stock Data
+
+> **Goal**: Working dashboard with real market data, stock search, and detailed stock pages.
+
+### Backend — Stock Data
+
+#### [NEW] `backend/app/services/stock_service.py`
+- Yahoo Finance integration via `yfinance`
+- Stock quote, historical data, company info
+- Redis caching (5-min TTL for quotes, 1-hour for historical)
+- Search by company name / symbol / sector
+
+#### [NEW] `backend/app/routers/stocks.py`
+- `GET /api/stocks/search?q={query}` — Search stocks
+- `GET /api/stocks/{symbol}` — Stock details (price, change, market cap, PE, etc.)
+- `GET /api/stocks/{symbol}/history?period={period}` — Historical OHLCV data
+- `GET /api/stocks/{symbol}/indicators` — Technical indicators (RSI, MACD, SMA, EMA, Bollinger)
+- `GET /api/stocks/market-summary` — Top gainers, losers, trending
+- `GET /api/stocks/sectors` — Sector performance
+
+#### [NEW] `backend/app/services/indicators_service.py`
+- RSI calculation
+- MACD calculation
+- Bollinger Bands
+- EMA / SMA
+- Volume analysis
+- Support / resistance levels
+
+### Frontend — Dashboard
+
+#### [NEW] `frontend/src/app/(dashboard)/layout.tsx`
+- Sidebar navigation (collapsible)
+- Top bar with search, notifications, user menu
+- Main content area with scrollable layout
+
+#### [NEW] `frontend/src/app/(dashboard)/dashboard/page.tsx`
+- **Portfolio Overview Card** — Total value, daily P&L, return %
+- **Market Summary** — S&P 500, NASDAQ, DOW tickers
+- **Watchlist Widget** — Top 5 watched stocks with spark charts
+- **AI Prediction Cards** — Latest predictions with confidence
+- **Trending Stocks** — Horizontal scrollable cards
+- **Top Gainers / Losers** — Two-column table
+- **Market News** — Latest 5 headlines
+- **Recent Predictions** — Activity feed
+
+#### [NEW] `frontend/src/app/(dashboard)/search/page.tsx`
+- Real-time search with debounced input
+- Results grouped by sector
+- Quick-add to watchlist
+
+#### [NEW] `frontend/src/app/(dashboard)/stocks/[symbol]/page.tsx`
+- Company header (logo, name, symbol, price, change)
+- Interactive chart (Line / Candlestick / Area / Volume)
+- Time filter buttons (1D, 5D, 1M, 3M, 6M, 1Y, 5Y)
+- Key statistics grid (Market Cap, PE, Volume, 52W High/Low, Dividend)
+- Technical indicators panel (RSI gauge, MACD chart, Bollinger overlay)
+- AI prediction card
+- Related news
+- Add to watchlist button
+
+#### [NEW] `frontend/src/components/charts/`
+- `StockChart.tsx` — Main chart with Recharts (line, area, candlestick)
+- `VolumeChart.tsx` — Volume bar chart
+- `RSIGauge.tsx` — RSI semicircle gauge
+- `MACDChart.tsx` — MACD histogram + signal line
+- `SparkChart.tsx` — Mini inline chart for tables
+
+#### [NEW] `frontend/src/lib/api.ts`
+- Axios/fetch wrapper with JWT interceptor
+- TanStack Query hooks for all endpoints
+- Error handling utilities
+
+---
+
+## Phase 3 — AI Predictions & ML Engine
+
+> **Goal**: Working ML prediction pipeline with multiple models, comparison metrics, and prediction UI.
+
+### ML Engine
+
+#### [NEW] `backend/app/ml/preprocessing.py`
+- Feature engineering from OHLCV data
+- Normalization / scaling
+- Train/test split
+- Sequence creation for LSTM/GRU
+
+#### [NEW] `backend/app/ml/models/linear_regression.py`
+- Scikit-learn LinearRegression wrapper
+- Training, prediction, metrics
+
+#### [NEW] `backend/app/ml/models/random_forest.py`
+- Scikit-learn RandomForestRegressor
+- Feature importance extraction
+
+#### [NEW] `backend/app/ml/models/xgboost_model.py`
+- XGBoost regressor
+- Hyperparameter tuning
+
+#### [NEW] `backend/app/ml/models/lstm_model.py`
+- TensorFlow LSTM network
+- Sequence-based prediction
+
+#### [NEW] `backend/app/ml/models/gru_model.py`
+- TensorFlow GRU network
+- Alternative to LSTM
+
+#### [NEW] `backend/app/ml/trainer.py`
+- Train all models on historical data
+- Cross-validation
+- Model comparison (MAE, RMSE, MAPE)
+- Save best model
+
+#### [NEW] `backend/app/ml/predictor.py`
+- Load trained model
+- Generate predictions: tomorrow, 7-day, 30-day
+- Confidence score calculation
+- Trend direction (Strong Buy → Strong Sell)
+
+### Backend — Prediction API
+
+#### [NEW] `backend/app/routers/predictions.py`
+- `POST /api/predictions/{symbol}` — Generate new prediction
+- `GET /api/predictions/{symbol}` — Get latest prediction
+- `GET /api/predictions/{symbol}/history` — Past predictions with accuracy
+- `GET /api/predictions/compare-models/{symbol}` — Model comparison metrics
+
+### Frontend — AI Predictions
+
+#### [NEW] `frontend/src/app/(dashboard)/predictions/page.tsx`
+- Stock selector
+- Prediction results panel:
+  - Tomorrow price + change %
+  - 7-day forecast chart
+  - 30-day forecast chart
+  - Confidence meter (radial gauge)
+  - Signal badge (Strong Buy → Strong Sell)
+- Model comparison table (MAE, RMSE, MAPE per model)
+- Historical accuracy chart
+
+#### [NEW] `frontend/src/components/predictions/`
+- `PredictionCard.tsx` — Single prediction display
+- `ConfidenceGauge.tsx` — Radial confidence meter
+- `ForecastChart.tsx` — Predicted vs actual line chart
+- `ModelComparison.tsx` — Table comparing ML models
+- `SignalBadge.tsx` — Buy/Sell/Hold badge with color
+
+---
+
+## Phase 4 — Portfolio, Watchlist, News, Settings & Polish
+
+> **Goal**: Complete all remaining features, add polish, and prepare for production.
+
+### Backend
+
+#### [NEW] `backend/app/routers/portfolio.py`
+- `POST /api/portfolio/holdings` — Add holding
+- `GET /api/portfolio` — Get portfolio summary
+- `DELETE /api/portfolio/holdings/{id}` — Remove holding
+- Calculated fields: P&L, daily return, overall return, allocation
+
+#### [NEW] `backend/app/routers/watchlist.py`
+- `POST /api/watchlist` — Add stock
+- `GET /api/watchlist` — List watchlist
+- `DELETE /api/watchlist/{symbol}` — Remove stock
+- `PUT /api/watchlist/sort` — Reorder
+
+#### [NEW] `backend/app/routers/news.py`
+- `GET /api/news` — Latest market news
+- `GET /api/news/{symbol}` — Company-specific news
+- News aggregation from free sources
+- Basic sentiment analysis per headline
+
+#### [NEW] `backend/app/services/news_service.py`
+- Finnhub news API integration
+- Sentiment scoring with TextBlob/VADER
+
+### Frontend
+
+#### [NEW] `frontend/src/app/(dashboard)/portfolio/page.tsx`
+- Portfolio value card with animated counter
+- Holdings table (sortable)
+- P&L chart over time
+- Asset allocation donut chart
+- Add holding modal
+
+#### [NEW] `frontend/src/app/(dashboard)/watchlist/page.tsx`
+- Watchlist table with live prices
+- Spark charts per stock
+- Quick prediction button
+- Drag-to-reorder
+- Price alert configuration
+
+#### [NEW] `frontend/src/app/(dashboard)/news/page.tsx`
+- News feed with cards
+- Sentiment badges (Positive/Neutral/Negative)
+- Filter by company
+- AI summary (if available)
+
+#### [NEW] `frontend/src/app/(dashboard)/settings/page.tsx`
+- Theme toggle (Dark/Light)
+- Notification preferences
+- Account settings (name, email, password)
+- Security settings (2FA placeholder)
+- Delete account
+
+#### [NEW] `frontend/src/app/(dashboard)/about/page.tsx`
+- About the platform
+- Technology stack
+- Team section
+- Contact
+
+### Polish & Animations
+- Page transitions with Framer Motion `AnimatePresence`
+- Loading skeletons on all data-fetching pages
+- Hover effects on all interactive elements
+- Card lift effects
+- Number counter animations on dashboard stats
+- Chart entry animations
+- Toast notifications for actions
+- Error boundaries with fallback UI
+- 404 page
+
+---
+
+## Folder Structure Summary
+
+```
+stock predication/
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── page.tsx                    # Landing page
+│   │   │   ├── layout.tsx                  # Root layout
+│   │   │   ├── (auth)/
+│   │   │   │   ├── login/page.tsx
+│   │   │   │   ├── register/page.tsx
+│   │   │   │   └── forgot-password/page.tsx
+│   │   │   └── (dashboard)/
+│   │   │       ├── layout.tsx              # Dashboard layout
+│   │   │       ├── dashboard/page.tsx
+│   │   │       ├── search/page.tsx
+│   │   │       ├── stocks/[symbol]/page.tsx
+│   │   │       ├── predictions/page.tsx
+│   │   │       ├── portfolio/page.tsx
+│   │   │       ├── watchlist/page.tsx
+│   │   │       ├── news/page.tsx
+│   │   │       ├── settings/page.tsx
+│   │   │       └── about/page.tsx
+│   │   ├── components/
+│   │   │   ├── ui/                         # Shared UI
+│   │   │   ├── charts/                     # Chart components
+│   │   │   ├── predictions/                # ML prediction UI
+│   │   │   ├── landing/                    # Landing page sections
+│   │   │   └── dashboard/                  # Dashboard widgets
+│   │   ├── lib/
+│   │   │   ├── api.ts                      # API client
+│   │   │   ├── utils.ts                    # Utilities
+│   │   │   └── constants.ts                # App constants
+│   │   ├── hooks/                          # Custom hooks
+│   │   ├── types/                          # TypeScript types
+│   │   └── styles/
+│   │       └── globals.css                 # Design tokens
+│   ├── public/                             # Static assets
+│   ├── next.config.ts
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   └── package.json
+│
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── routers/
+│   │   ├── services/
+│   │   ├── ml/
+│   │   └── utils/
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   └── alembic/
+│
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+---
+
+## Verification Plan
+
+### Automated Tests
+```bash
+# Frontend
+cd frontend && npm run lint && npm run build
+
+# Backend
+cd backend && python -m pytest tests/ -v
+
+# ML Pipeline
+cd backend && python -m pytest tests/test_ml.py -v
+```
+
+### Manual Verification
+- Landing page renders with all 10 sections, animations work
+- Auth flow: register → login → JWT stored → dashboard accessible
+- Dashboard loads with market data (or demo data)
+- Stock search returns results, stock detail page renders with charts
+- AI prediction generates results with confidence scores
+- Portfolio CRUD operations work
+- Watchlist add/remove works
+- News feed loads with sentiment
+- Dark/Light mode toggle works
+- All pages are responsive (mobile, tablet, desktop)
+
+---
+
+## Estimated Build Order
+
+| Phase | Scope | Key Deliverables |
+|-------|-------|-----------------|
+| **Phase 1** | Foundation | Project scaffold, design system, landing page, auth pages, backend auth API, Docker Compose |
+| **Phase 2** | Data & Dashboard | Yahoo Finance integration, stock endpoints, dashboard page, stock detail page, charts, technical indicators |
+| **Phase 3** | AI/ML | ML pipeline (5 models), prediction API, prediction UI, model comparison |
+| **Phase 4** | Complete | Portfolio, watchlist, news, settings, about, animations, polish, production readiness |
+
+---
+
+> [!TIP]
+> I recommend we start with **Phase 1** immediately. Each phase will result in a demoable, working state. Shall I proceed?
