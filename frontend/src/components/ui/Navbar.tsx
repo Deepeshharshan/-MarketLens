@@ -61,9 +61,10 @@ export default function Navbar() {
               <a
                 key={link.label}
                 href={link.href}
-                className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary rounded-lg hover:bg-surface-light/50 transition-all duration-200"
+                className="relative px-2 py-1 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors duration-300 group/link focus-ring rounded"
               >
                 {link.label}
+                <span className="absolute left-0 bottom-0 w-full h-[2px] bg-primary scale-x-0 group-hover/link:scale-x-100 transition-transform duration-300 origin-left" />
               </a>
             ))}
           </div>

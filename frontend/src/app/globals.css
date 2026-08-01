@@ -7,23 +7,24 @@
 
 @theme {
   /* ── Color Palette ── */
-  --color-primary: #10B981;
+  --color-primary: #10B981; /* Confident green */
   --color-primary-light: #34D399;
   --color-primary-dark: #059669;
-  --color-accent: #22C55E;
-  --color-accent-light: #4ADE80;
+  --color-accent: #3B82F6; /* Electric blue for highlights */
+  --color-accent-light: #60A5FA;
+  --color-accent-alt: #F59E0B; /* Warm amber */
 
-  --color-bg-primary: #0F172A;
-  --color-bg-secondary: #111827;
-  --color-bg-tertiary: #1E293B;
-  --color-bg-elevated: #1a2332;
+  --color-bg-primary: #0A0A0A; /* Near-black instead of navy */
+  --color-bg-secondary: #171717;
+  --color-bg-tertiary: #262626;
+  --color-bg-elevated: #171717;
 
-  --color-surface: #111827;
-  --color-surface-light: #1E293B;
-  --color-surface-hover: #243044;
+  --color-surface: #171717; /* Secondary surface tone */
+  --color-surface-light: #262626;
+  --color-surface-hover: #333333;
 
-  --color-border: #1E293B;
-  --color-border-light: #334155;
+  --color-border: #262626;
+  --color-border-light: #404040;
 
   --color-text-primary: #F8FAFC;
   --color-text-secondary: #94A3B8;
@@ -40,8 +41,9 @@
   --color-hold: #F59E0B;
 
   /* ── Typography ── */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
 
   /* ── Spacing Scale ── */
   --spacing-section: 6rem;
@@ -69,6 +71,11 @@
   box-sizing: border-box;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
 html {
   scroll-behavior: smooth;
   color-scheme: dark;
@@ -81,6 +88,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  letter-spacing: 0.01em;
 }
 
 /* ── Scrollbar ── */
@@ -107,21 +115,21 @@ body {
 
 /* ── Glassmorphism Utilities ── */
 .glass {
-  background: rgba(17, 24, 39, 0.6);
+  background: rgba(23, 23, 23, 0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-light {
-  background: rgba(30, 41, 59, 0.4);
+  background: rgba(38, 38, 38, 0.4);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-card {
-  background: rgba(17, 24, 39, 0.5);
+  background: rgba(23, 23, 23, 0.5);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -131,9 +139,9 @@ body {
 }
 
 .glass-card:hover {
-  border-color: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
   box-shadow: var(--shadow-glow);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
 }
 
 /* ── Gradient Text ── */
@@ -154,8 +162,8 @@ body {
 /* ── Background Effects ── */
 .bg-grid {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 
@@ -248,4 +256,38 @@ body {
   border-radius: 12px !important;
   padding: 12px 16px !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ── Animated Gradient Border (Pricing Pro card) ── */
+@keyframes gradient-rotate {
+  0% { --gradient-angle: 0deg; }
+  100% { --gradient-angle: 360deg; }
+}
+
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.animated-gradient-bg {
+  background: conic-gradient(
+    from var(--gradient-angle),
+    #10B981,
+    #059669,
+    #F59E0B,
+    #3B82F6,
+    #10B981
+  );
+  animation: gradient-rotate 7s linear infinite;
+}
+
+/* ── Section Dividers ── */
+.section-divider-dots {
+  background-image: radial-gradient(circle, rgba(16, 185, 129, 0.2) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.section-divider-angle {
+  clip-path: polygon(0 0, 100% 40%, 100% 100%, 0% 100%);
 }

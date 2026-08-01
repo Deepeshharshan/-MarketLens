@@ -40,7 +40,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
           "rounded-[var(--radius-card)] transition-all duration-[var(--transition-base)]",
           variantStyles[variant],
           paddingStyles[padding],
-          hover && variant !== "glass" && "hover:border-primary/20 hover:shadow-glow hover:-translate-y-0.5",
+          hover && variant !== "glass" && "hover:border-primary/40 hover:shadow-glow hover:-translate-y-1",
           className
         )}
         {...props}
